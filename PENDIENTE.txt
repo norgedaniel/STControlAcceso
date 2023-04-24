@@ -1,0 +1,1 @@
+1- RangoTiempo, definir AK ( DiaSemana, HoraInicial, HoraFinal )
