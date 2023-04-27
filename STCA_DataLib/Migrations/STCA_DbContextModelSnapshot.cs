@@ -10,7 +10,7 @@ using STCA_DataLib.Data;
 
 namespace STCA_DataLib.Migrations
 {
-    [DbContext(typeof(STCA_DbContext))]
+    [DbContext(typeof(MSSQL_STCA_DbContext))]
     partial class STCA_DbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -55,9 +55,11 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("Nombre");
 
                     b.ToTable("ZonaHoraria");
                 });

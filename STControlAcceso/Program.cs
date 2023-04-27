@@ -10,9 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // Add the STCA_DbContext to Services
-builder.Services.AddDbContext<STCA_DbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+builder.Services.AddDbContext<MSSQL_STCA_DbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
 
-builder.Services.AddScoped<ISTCA_DbService, SQLServer_STCA_DbService>();
+builder.Services.AddScoped<ISTCA_DbService, MSSQL_STCA_DbService>();
 
 var app = builder.Build();
 

@@ -1,7 +1,42 @@
 ﻿@model ZonaHorariaViewModel
 
+@using STCA_WebApp.Extensions;
+
+
 @{
     ViewData["Title"] = "Zonas Horarias";
+
+
+
+
+
+}
+
+@section Scripts{
+    <script type="text/javascript">
+
+        function delSubmit() {
+
+            var form = $("#delForm");
+            let itemsId = separador = '';
+
+            document.querySelectorAll('.done-checkbox').forEach(function (checkElement) {
+                if (checkElement.checked) {
+                    checkElement.disabled = true;
+                    itemsId = itemsId + separador + checkElement.value;
+                    separador = ',';
+                }
+            });
+
+            var lista = document.getElementById("itemsId");
+
+            lista.value = itemsId;
+
+            form.submit();
+
+        }
+
+    </script>
 }
 
 <div class="panel panel-default">
@@ -10,22 +45,43 @@
 
     <table class="table table-hover">
         <thead>
-
-            @foreach (var item in Model.ZonasHorarias)
-            {
-                <tr>
-                    <td>@item.Nombre</td>
-                </tr>
-            }
+            <tr>
+                <td>&#10003</td>
+                <td>
+                    <a asp-controller="ZonaHoraria" asp-route-columorder="nombre">Nombre</a>
+                </td>
+            </tr>
 
         </thead>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    <input class="done-checkbox" type="checkbox" value="@item.Id">
+                </td>
+                <td>@item.Nombre</td>
+            </tr>
+        }
     </table>
 
 </div>
 
 <div class="panel-footer add-item-form">
-    @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+    <table>
+        <tr>
+            <td>
+                <form id="delForm" method="post" asp-action="Delete">
+                    <input type="button" value="Eliminar" id="Save" onclick="javascript:delSubmit()" />
+                    <input type="hidden" name="itemsId" id="itemsId" />
+                </form>
+            </td>
+            <td>
+                @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+            </td>
+        </tr>
+    </table>
 </div>
+
 
 
 

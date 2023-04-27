@@ -12,8 +12,8 @@ using STCA_DataLib.Data;
 namespace STCA_DataLib.Migrations
 {
     [DbContext(typeof(MSSQL_STCA_DbContext))]
-    [Migration("20230424193046_inicial")]
-    partial class inicial
+    [Migration("20230424224332_ZonaHoraria_AK")]
+    partial class ZonaHoraria_AK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -58,9 +58,11 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasAlternateKey("Nombre");
 
                     b.ToTable("ZonaHoraria");
                 });

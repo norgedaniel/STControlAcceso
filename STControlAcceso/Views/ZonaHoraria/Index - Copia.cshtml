@@ -1,0 +1,38 @@
+﻿@model ZonaHorariaViewModel
+
+@{
+    ViewData["Title"] = "Zonas Horarias";
+}
+
+<div class="panel panel-default">
+
+    <div class="panel-heading">@ViewData["Title"]</div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <td></td>
+                <td>Nombre</td>
+            </tr>
+
+        </thead>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    <form asp-action="Delete" method="post">
+                        <button>Del</button>
+                        <input type="hidden" name="id" value="@item.Id">
+                    </form>
+                </td>
+                <td>@item.Nombre</td>
+            </tr>
+        }
+    </table>
+
+</div>
+
+<div class="panel-footer add-item-form">
+    @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+</div>
+

@@ -1,9 +1,11 @@
-﻿using STCA_DataLib.Model;
+﻿using STCA_WebApp.ModelsDTO;
+using static STCA_WebApp.Extensions.ZonaHorariaExtension;
 
 namespace STCA_WebApp.Models
 {
     public class ZonaHorariaViewModel
     {
-        public ZonaHoraria[] ZonasHorarias { get; set; } = new ZonaHoraria[0];
+        public ZonaHorariaListDTO[] Items { get; set; } = new ZonaHorariaListDTO[0];
+
     }
 }
