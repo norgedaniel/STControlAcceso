@@ -25,7 +25,7 @@ namespace STCA_WebApp.Services
 
         public async Task<bool> DeleteZonaHorariaAsync(int id)
         {
-            var item = await _dbContext.ZonaHoraria.Where(x => x.Id == id).FirstOrDefaultAsync();
+            var item = await _dbContext.ZonasHorarias.Where(x => x.Id == id).FirstOrDefaultAsync();
             if (item == null)
                 return false;
 
@@ -34,17 +34,38 @@ namespace STCA_WebApp.Services
 
         }
 
-        public async Task<ZonaHorariaListDTO[]> GetZonasHorariasAsync(ZonaHorariaOrderbyOptions? orderbyOptions = ZonaHorariaOrderbyOptions.NOMBRE_ASC)
+        public async Task<ZonaHorariaListDTO[]> GetZonasHorariasAsync(ZonaHorariaQueryOptions zonaHorariaQueryOptions)
         {
-            var items = await _dbContext.ZonaHoraria.AsNoTracking()
+            //OrderbyOptions? orderbyOptions = OrderbyOptions.NOMBRE_ASC
+
+            if (zonaHorariaQueryOptions == null) zonaHorariaQueryOptions = new();
+
+
+            //out int cantPaginas,
+            int numPaginaBaseCero = 0;
+            int longPagina = 10;
+
+            var items = await _dbContext.ZonasHorarias.AsNoTracking()
                 .MapZonaHorariaToDto()
-                .OrderBy(orderbyOptions)
-                .Take(100)
+                .Ordenar(zonaHorariaQueryOptions.OrderbyOptions)
+                .Pagina(out int cantPaginas, ref numPaginaBaseCero, longPagina)
                 .ToArrayAsync();
 
             return items;
 
         }
 
+
+
+        public async Task<RangoTiempo[]> GetRangosTiempoAsync()
+        {
+            return await _dbContext.RangosTiempos
+                    .AsNoTracking()
+                    .ToArrayAsync();
+        }
+
     }
+
+
+
 }

@@ -12,7 +12,9 @@ namespace STCA_DataLib.Model
         public int Id { get; set; }
 
         [Required]
-        public string? Nombre { get; set; }
+        [MaxLength(40)]
+        [Display(Name = "Nombre")]
+        public string Nombre { get; set; } = string.Empty;
 
         public ICollection<ZonaHoraria_RangoTiempo>? ZonaHoraria_RangoTiempo { get; set; }
 

@@ -12,8 +12,8 @@ using STCA_DataLib.Data;
 namespace STCA_DataLib.Migrations
 {
     [DbContext(typeof(MSSQL_STCA_DbContext))]
-    [Migration("20230424224332_ZonaHoraria_AK")]
-    partial class ZonaHoraria_AK
+    [Migration("20230427170741_incial")]
+    partial class incial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,8 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("DiaSemana")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<TimeSpan>("HoraFinal")
                         .HasColumnType("time");
@@ -45,7 +46,9 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RangoTiempo");
+                    b.HasAlternateKey("DiaSemana", "HoraInicial", "HoraFinal");
+
+                    b.ToTable("RANGO_TIEMPO", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria", b =>
@@ -58,13 +61,14 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.HasKey("Id");
 
                     b.HasAlternateKey("Nombre");
 
-                    b.ToTable("ZonaHoraria");
+                    b.ToTable("ZONA_HORARIA", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria_RangoTiempo", b =>
@@ -79,7 +83,7 @@ namespace STCA_DataLib.Migrations
 
                     b.HasIndex("RangoTiempoId");
 
-                    b.ToTable("ZonaHoraria_RangoTiempo");
+                    b.ToTable("ZONA_HORARIA_RANGO_TIEMPO", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria_RangoTiempo", b =>

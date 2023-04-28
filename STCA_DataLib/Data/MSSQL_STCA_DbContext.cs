@@ -14,6 +14,11 @@ namespace STCA_DataLib.Data
     {
         private readonly string _connectionstring = @"Data Source=LAPTOP-0KKLKRNG\SQLEXPRESS;Initial Catalog=STCA_DEV;Integrated Security=true;TrustServerCertificate=true;";
 
+        public MSSQL_STCA_DbContext()
+        {
+            
+        }
+
         public MSSQL_STCA_DbContext(DbContextOptions<MSSQL_STCA_DbContext> options) : base(options)
         {
         }
@@ -27,14 +32,27 @@ namespace STCA_DataLib.Data
         {
             base.OnModelCreating(modelBuilder);
 
+
+            // ZonaHoraria
+            modelBuilder.Entity<ZonaHoraria>().ToTable("ZONA_HORARIA");
             modelBuilder.Entity<ZonaHoraria>().HasAlternateKey("Nombre");
 
+
+            // RangoTiempo
+            modelBuilder.Entity<RangoTiempo>().ToTable("RANGO_TIEMPO");
+            modelBuilder.Entity<RangoTiempo>().HasAlternateKey(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal });
+
+
+            // ZonaHoraria_RangoTiempo
+            modelBuilder.Entity<ZonaHoraria_RangoTiempo>().ToTable("ZONA_HORARIA_RANGO_TIEMPO");
             modelBuilder.Entity<ZonaHoraria_RangoTiempo>()
                 .HasKey(x => new { x.ZonaHorariaId, x.RangoTiempoId });
 
         }
 
-        public DbSet<ZonaHoraria> ZonaHoraria { get; set; }
+        public DbSet<ZonaHoraria> ZonasHorarias { get; set; }
+
+        public DbSet<RangoTiempo> RangosTiempos { get; set; }
 
     }
 }

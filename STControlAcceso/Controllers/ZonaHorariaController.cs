@@ -23,23 +23,32 @@ namespace STCA_WebApp.Controllers
         }
 
         // GET: ZonaHorariaController
-        public async Task<IActionResult> Index(string columorder)
+        public async Task<IActionResult> Index(string getOptions)
         {
             /*
-              cuando columorder tiene un valor valido, se conmuta OrderbyOption almacenado en TempData["OrderbyOption"].
-              en caso contrario, OrderbyOption se queda con el valor que trae en TempData["OrderbyOption"]
+             * getOptions indica una acción de ordenamiento o paginado, acometida por el usuario para realizar la búsqueda de los datos soicitados.
+             * Para una acción de ordenamiento tendrá el nombre del atributo o columna presionada.
+             * Para una acción de paginado tendrá: #INI, #ANT, #SIG, #FIN
+             * 
+             * Cuando tiene un valor valido de ordenamiento, se conmuta OrderbyOption almacenado en TempData["ZonaHorariaQueryOption"], según la columna presionada.
+             * En caso contrario, OrderbyOption se queda con el valor que trae en TempData["ZonaHorariaQueryOption"]. 
+             * 
              */
 
-            if (columorder == null) columorder = string.Empty;
+            if (getOptions == null) getOptions = string.Empty;
 
-            // con esta asignación, desaparece TempData["OrderbyOption"], se hace null
-            ZonaHorariaOrderbyOptions orderby = ZonaHorariaExtension.Parse(TempData["OrderbyOption"]) ?? ZonaHorariaOrderbyOptions.NOMBRE_ASC;
+            // con esta asignación, desaparece TempData["ZonaHorariaQueryOption"], se hace null
+            ZonaHorariaQueryOptions zonaHorariaQueryOptions = ZonaHorariaQueryOptions.Parse(TempData["ZonaHorariaQueryOption"]);
+
+          
+            // con esta asignación, desaparece TempData["ZonaHorariaQueryOption"], se hace null
+            //OrderbyOptions orderby = ZonaHorariaExtension.Parse(TempData["ZonaHorariaQueryOption"]) ?? OrderbyOptions.NOMBRE_ASC;
 
             if (columorder.Contains("nombre")) orderby = orderby.ConmutaOrderbyNombre();
 
-            TempData["OrderbyOption"] = orderby;
+            TempData["ZonaHorariaQueryOption"] = zonaHorariaQueryOptions;
 
-            var items = await _STCA_DbService.GetZonasHorariasAsync(orderby);
+            var items = await _STCA_DbService.GetZonasHorariasAsync(zonaHorariaQueryOptions);
 
             ZonaHorariaViewModel model = new ZonaHorariaViewModel
             {

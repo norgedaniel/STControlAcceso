@@ -9,7 +9,7 @@ namespace STCA_DataLib.Model
 {
     public enum DiasSemana
     {
-        LUN, MAR, MIE, JUE, VIE, SAB, DOM
+        LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO
     }
 
     public class RangoTiempo
@@ -17,7 +17,9 @@ namespace STCA_DataLib.Model
         public int Id { get; set; }
 
         [Required]
-        public string? DiaSemana { get; set; }
+        [MaxLength(10)]
+        [Display(Name = "Día de la Semana")]
+        public string DiaSemana { get; set; } = string.Empty;
 
         [Required]
         public TimeSpan HoraInicial { get; set; }

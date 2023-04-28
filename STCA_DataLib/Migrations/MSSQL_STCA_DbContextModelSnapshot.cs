@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using STCA_DataLib.Data;
 
@@ -12,11 +11,9 @@ using STCA_DataLib.Data;
 namespace STCA_DataLib.Migrations
 {
     [DbContext(typeof(MSSQL_STCA_DbContext))]
-    [Migration("20230424193046_inicial")]
-    partial class inicial
+    partial class MSSQL_STCA_DbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,7 +32,8 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("DiaSemana")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<TimeSpan>("HoraFinal")
                         .HasColumnType("time");
@@ -45,7 +43,9 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RangoTiempo");
+                    b.HasAlternateKey("DiaSemana", "HoraInicial", "HoraFinal");
+
+                    b.ToTable("RANGO_TIEMPO", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria", b =>
@@ -58,11 +58,14 @@ namespace STCA_DataLib.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ZonaHoraria");
+                    b.HasAlternateKey("Nombre");
+
+                    b.ToTable("ZONA_HORARIA", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria_RangoTiempo", b =>
@@ -77,7 +80,7 @@ namespace STCA_DataLib.Migrations
 
                     b.HasIndex("RangoTiempoId");
 
-                    b.ToTable("ZonaHoraria_RangoTiempo");
+                    b.ToTable("ZONA_HORARIA_RANGO_TIEMPO", (string)null);
                 });
 
             modelBuilder.Entity("STCA_DataLib.Model.ZonaHoraria_RangoTiempo", b =>
