@@ -2,7 +2,9 @@
 {
     public class PagingOptions
     {
-        public int PageZise { get; set; } = 10;
+        public const int DEFAULT_PAGE_SIZE = 10;
+
+        public int PageZise { get; set; } = DEFAULT_PAGE_SIZE;
 
         public int PageNumberZeroBase { get; set; } = 0;
 

@@ -2,6 +2,7 @@
 using Shared;
 using STCA_DataLib.Data;
 using STCA_DataLib.Model;
+using STCA_WebApp.DTO;
 using STCA_WebApp.Extensions;
 using STCA_WebApp.ModelsDTO;
 using static STCA_WebApp.Extensions.ZonaHorariaExtension;
@@ -34,27 +35,25 @@ namespace STCA_WebApp.Services
 
         }
 
-        public async Task<ZonaHorariaListDTO[]> GetZonasHorariasAsync(ZonaHorariaQueryOptions zonaHorariaQueryOptions)
+        public async Task<ZonaHorariaListDTO> GetZonasHorariasAsync(ZonaHorariaPagingOptions zonaHorariaQueryOptions)
         {
-            //OrderbyOptions? orderbyOptions = OrderbyOptions.NOMBRE_ASC
-
             if (zonaHorariaQueryOptions == null) zonaHorariaQueryOptions = new();
 
-
-            //out int cantPaginas,
-            int numPaginaBaseCero = 0;
-            int longPagina = 10;
+            PagingOptions pagingOptionsTemp = zonaHorariaQueryOptions.PagingOptions;
 
             var items = await _dbContext.ZonasHorarias.AsNoTracking()
                 .MapZonaHorariaToDto()
-                .Ordenar(zonaHorariaQueryOptions.OrderbyOptions)
-                .Pagina(out int cantPaginas, ref numPaginaBaseCero, longPagina)
+                .Ordenar(zonaHorariaQueryOptions.OrderbyOption)
+                .Pagina(ref pagingOptionsTemp)
                 .ToArrayAsync();
 
-            return items;
+            return new ZonaHorariaListDTO
+            {
+                Items = items,
+                PagingOptions = pagingOptionsTemp
+            };
 
         }
-
 
 
         public async Task<RangoTiempo[]> GetRangosTiempoAsync()

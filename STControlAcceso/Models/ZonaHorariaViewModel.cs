@@ -5,7 +5,7 @@ namespace STCA_WebApp.Models
 {
     public class ZonaHorariaViewModel
     {
-        public ZonaHorariaListDTO[] Items { get; set; } = new ZonaHorariaListDTO[0];
+        public ZonaHorariaDTO[] Items { get; set; } = new ZonaHorariaDTO[0];
 
     }
 }

@@ -2,14 +2,18 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using Shared;
 using STCA_DataLib.Data;
 using STCA_DataLib.Model;
+using STCA_WebApp.DTO;
 using STCA_WebApp.Extensions;
 using STCA_WebApp.Models;
 using STCA_WebApp.Services;
 using static STCA_WebApp.Extensions.ZonaHorariaExtension;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace STCA_WebApp.Controllers
 {
@@ -23,7 +27,7 @@ namespace STCA_WebApp.Controllers
         }
 
         // GET: ZonaHorariaController
-        public async Task<IActionResult> Index(string getOptions)
+        public async Task<IActionResult> Index(string getOption)
         {
             /*
              * getOptions indica una acción de ordenamiento o paginado, acometida por el usuario para realizar la búsqueda de los datos soicitados.
@@ -35,24 +39,41 @@ namespace STCA_WebApp.Controllers
              * 
              */
 
-            if (getOptions == null) getOptions = string.Empty;
+            if (getOption == null)
+                getOption = string.Empty;
+            else
+                getOption = getOption.ToUpper();
 
             // con esta asignación, desaparece TempData["ZonaHorariaQueryOption"], se hace null
-            ZonaHorariaQueryOptions zonaHorariaQueryOptions = ZonaHorariaQueryOptions.Parse(TempData["ZonaHorariaQueryOption"]);
+            var tempData = TempData["ZonaHorariaQueryOption"];
+            ZonaHorariaPagingOptions zonaHorariaQueryOptions = ZonaHorariaPagingOptions.Deserialize(tempData);
+        
 
-          
-            // con esta asignación, desaparece TempData["ZonaHorariaQueryOption"], se hace null
-            //OrderbyOptions orderby = ZonaHorariaExtension.Parse(TempData["ZonaHorariaQueryOption"]) ?? OrderbyOptions.NOMBRE_ASC;
+            string strOpcionesPaginado = ",INI,#ANT,#SIG,#FIN,";
 
-            if (columorder.Contains("nombre")) orderby = orderby.ConmutaOrderbyNombre();
+            if (strOpcionesPaginado.Contains(getOption))
+            {
+                // se solicita un paginado
 
-            TempData["ZonaHorariaQueryOption"] = zonaHorariaQueryOptions;
+            }
+            else
+            {
+                // se puede estar solicitando un ordenamiento
+                if (getOption == "NOMBRE") zonaHorariaQueryOptions.ConmutaOrderbyNombre();
 
-            var items = await _STCA_DbService.GetZonasHorariasAsync(zonaHorariaQueryOptions);
+            }
+
+
+            // la actualización de TempData debe hacerse después de correr _STCA_DbService.GetZonasHorariasAsync
+            // pues dentro de ese llamado puede actualizarse los datos del paginado
+            ZonaHorariaListDTO zonaHorariaListDTO = await _STCA_DbService.GetZonasHorariasAsync(zonaHorariaQueryOptions);
+            zonaHorariaQueryOptions.PagingOptions = zonaHorariaListDTO.PagingOptions;
+
+            TempData["ZonaHorariaQueryOption"] = JsonConvert.SerializeObject(zonaHorariaQueryOptions); 
 
             ZonaHorariaViewModel model = new ZonaHorariaViewModel
             {
-                Items = items
+                Items = zonaHorariaListDTO.Items
             };
 
             return View(model);

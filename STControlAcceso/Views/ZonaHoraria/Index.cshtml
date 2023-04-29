@@ -5,11 +5,6 @@
 
 @{
     ViewData["Title"] = "Zonas Horarias";
-
-
-
-
-
 }
 
 @section Scripts{
@@ -48,7 +43,7 @@
             <tr>
                 <td>&#10003</td>
                 <td>
-                    <a asp-controller="ZonaHoraria" asp-route-columorder="nombre">Nombre</a>
+                    <a asp-controller="ZonaHoraria" asp-route-getOption="NOMBRE">Nombre</a>
                 </td>
             </tr>
 
@@ -76,7 +71,7 @@
                 </form>
             </td>
             <td>
-                @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+                  @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
             </td>
         </tr>
     </table>

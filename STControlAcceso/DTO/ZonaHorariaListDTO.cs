@@ -1,12 +1,13 @@
-﻿using STCA_DataLib.Model;
+﻿using STCA_WebApp.Extensions;
+using STCA_WebApp.ModelsDTO;
 
-namespace STCA_WebApp.ModelsDTO
+namespace STCA_WebApp.DTO
 {
     public class ZonaHorariaListDTO
     {
-        public int Id { get; set; }
+        public ZonaHorariaDTO[] Items { get; set; } = new ZonaHorariaDTO[0];
 
-        public string? Nombre { get; set; }
+        public PagingOptions PagingOptions { get; set; } = new();
 
     }
 }
