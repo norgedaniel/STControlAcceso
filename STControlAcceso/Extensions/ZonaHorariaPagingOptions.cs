@@ -6,9 +6,9 @@ namespace STCA_WebApp.Extensions
 {
     public class ZonaHorariaPagingOptions
     {
-        public enum OrderbyOptionValues { NOMBRE_ASC, NOMBRE_DESC };
-
         public PagingOptions PagingOptions { get; set; } = new();
+
+        public enum OrderbyOptionValues { NOMBRE_ASC, NOMBRE_DESC };
 
         public OrderbyOptionValues OrderbyOption { get; set; } = OrderbyOptionValues.NOMBRE_ASC;
 

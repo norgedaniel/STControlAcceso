@@ -4,6 +4,7 @@ using System.Drawing.Printing;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using static STCA_WebApp.Extensions.ZonaHorariaPagingOptions;
+using static STCA_WebApp.Models.ZonaHorariaViewModel;
 
 namespace STCA_WebApp.Extensions
 {
@@ -51,12 +52,11 @@ namespace STCA_WebApp.Extensions
 
             pagingOptions.PageNumberZeroBase = int.Max(pagingOptions.PageNumberZeroBase, 0);
 
-            pagingOptions.PageZise = int.Max(pagingOptions.PageZise, 10);
+            if (pagingOptions.PageZise < 1) pagingOptions.PageZise = PagingOptions.DEFAULT_PAGE_SIZE;
 
+            pagingOptions.PagesCount = (int)(cantItems / pagingOptions.PageZise);
 
-            pagingOptions.PagesCount = (int)(pagingOptions.PagesCount / pagingOptions.PageZise);
-
-            if (pagingOptions.PagesCount % pagingOptions.PageZise > 0)
+            if (cantItems % pagingOptions.PageZise > 0)
                 pagingOptions.PagesCount++;
 
             //2 - si numero_pagina > cantidad_paginas-1 => numero_pagina = cantidad_paginas-1
@@ -68,8 +68,7 @@ namespace STCA_WebApp.Extensions
             {
                 //3 - hacer seek y tomar la cantidad de items según tamaño_pagina
                 int iSkip = pagingOptions.PageNumberZeroBase * pagingOptions.PageZise;
-                zonasHorarias.Skip(iSkip);
-                zonasHorariasRetorno = zonasHorarias.Take(pagingOptions.PageZise);
+                zonasHorariasRetorno = zonasHorarias.Skip(iSkip).Take(pagingOptions.PageZise);
 
                 //4 - si cantidad_rec encontrados es cero => decrementar numero_pagina => ir a 3
                 //       el lazo de ir a 3 termina cdo numero_pagina = 0
