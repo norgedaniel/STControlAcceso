@@ -1,0 +1,41 @@
+---------------------------------------------------------------------------------------------------------------------------------
+Anotaciones más importantes para el diseño de las Entidades y la BD:
+
+[Required]: define que el atributo de la entidad y el campo de BD sean requeridos (not null en la BD).
+
+
+[MaxLength(40)]: tamaño máximo para un campo string. Se toma en cuenta en la edición, introducción del dato.
+                 define el valor para el nvarchar en la BD.
+
+
+[Display(Name = "")]: define el label o etiqueta a mostrar en todas las vistas donde se muestra o capta valor para el atributo
+                      Se usa  @Html.DisplayNameFor(model => model.RangoTiempo[0].DiaSemana)
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+FluentAPI más importantes para el diseño de las Entidades y la BD:
+
+La personalización mediante FluentAPI se hace desde el método OnModelCreating(ModelBuilder modelBuilder) 
+sobre escrito en nuestro DbContext.
+
+protected override void OnModelCreating(ModelBuilder modelBuilder) {}
+
+
+- para personalizar el nombre de la tabla a generar en la BD.
+	modelBuilder.Entity<ZonaHoraria>().ToTable("ZONA_HORARIA"): 
+
+
+- para definir Alternaties Keys:
+	modelBuilder.Entity<ZonaHoraria>().HasAlternateKey("Nombre");
+	modelBuilder.Entity<RangoTiempo>().HasAlternateKey(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal });
+
+
+- para definir una Primary Key:
+
+	en este caso una lleve múltiple en una tabla que es puente en una relación mucho a mucho.
+	modelBuilder.Entity<ZonaHoraria_RangoTiempo>()
+		.HasKey(x => new { x.ZonaHorariaId, x.RangoTiempoId });  
+
+
+

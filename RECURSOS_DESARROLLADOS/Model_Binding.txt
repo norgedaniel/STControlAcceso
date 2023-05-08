@@ -1,0 +1,102 @@
+Mediante el Model Binding, ASP.Net Core se intenta setear las variables de trabajo del Controlador a partir de los valores 
+que llegan en el HttpRequest desde el cliente.
+
+El Model Binding trata de hacer coincidir los datos que llegados al Controlador (tanto mediante GET como por POST), 
+con las variables (simples o complejas) que usamos en el contralador.
+
+Toma como origen de esos datos a los campos de un formulario, los elementos del Routing o los parámetros del QueryString 
+que pueden venir en el URL, ejemplo: ?nombre=Jose&edad=20 
+
+Las variables en el Controlador pueden ser simples o complejas. Pueden ser globales a todo el controlador o específicas 
+a una acción o método del contralador.
+
+En el caso de las variables globales deben estar precedidas por la etiqueta [BindProperty] para asegurar 
+que participarán en el Model Binding; o marcar todo el contralador mediante [BindProperties] que define a todos los atributos
+globales para Model Binding.
+
+ 
+Para facilitar este procedimiento de Model Binding, podemos auxiliarnos de los Tag Helpers, por ejemplo al implementar un formulario.
+
+Los Tag Helpers en un formulario permiten definir el controlador y el método del controlador que atenderá el request.
+Tenemos asp-controller, asp-actio. Ejemplo:
+
+	<form asp-controller="Demo" asp-action="Register" method="post">
+		<!-- Input and Submit elements -->
+	</form>
+
+En los input a usar dentro del formulario podemos usar: asp-for.
+
+	<input asp-for="<Expression Name>">
+	
+donde decimos que el valor de ese input, debe enlazarse de forma automática con el correspondiente atributo del Modelo 
+que definimos de manera global en el controlador. 
+
+IMPORTANTE: asp-for sólo enlaza contra un atributo del mismo modelo definido en la Vista y no contra un parámetro en la acción
+del controlador que llama el formulario; por lo que para hacer uso de asp-for se necesita una variable del Modelo 
+que sea global al contralador.
+
+
+Otro tag-helper útil es el empleado para construir listas desdeplegables o combobox. Es el: asp-items.
+
+Ejemplo:
+
+	<select name="products" class="form-control" asp-items="@ViewBag.cities"></select>
+	
+Aquí se recibe en el ViewBag una lista con los datos a mostrar.
+
+    public static List<SelectListItem> GetPageZiseOptions(string DefaultValue = @"{DEFAULT_PAGE_SIZE}")
+	{
+		List<SelectListItem> lista = new()
+		{
+			new SelectListItem { Value = "3", Text = "3" },
+			new SelectListItem { Value = "10", Text = "10" },
+			new SelectListItem { Value = "50", Text = "50" }
+		};
+
+		foreach (var item in lista)
+		{
+			if (item.Value == DefaultValue)
+			{
+				item.Selected = true;
+				break;
+			}
+		}
+
+		return lista;
+
+	}
+
+
+
+
+--------------------------------------------------------------------------------------------
+
+Otro aspecto diferente es el envío de datos hacia la vista desde el controlador.
+
+La vía principal es a través de un objeto del Modelo que la vista espera, al hacer un return View(model);
+
+También estás disponibles los los diccionarios ViewData, TempData, ViewBag, Session.
+
+
+Una vista debe definir en la primera línea, cuál es la clase del Modelo de la que esperamos recibir datos directamente 
+desde el contralador, y podemos mostrar esos datos accedediendo a la variable Model.
+
+Ejemplo: Index.cshtml comenzando con:
+
+			@model ZonaHorariaViewModel
+		
+		luego podemos usar HTML tags que tome valores desde la variable Model:
+		
+		@foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    <input class="done-checkbox" type="checkbox" value="@item.Id">
+                </td>
+                <td>@item.Nombre</td>
+            </tr>
+        }
+	
+
+En la vista también podemos recibir valores a través de los diccionarios ViewData, TempData, ViewBag, Session.
+

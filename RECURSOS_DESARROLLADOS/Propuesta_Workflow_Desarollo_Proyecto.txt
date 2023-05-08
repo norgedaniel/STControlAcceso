@@ -1,0 +1,58 @@
+PROPUESTA DE WORKFLOW PARA EL DESARROLLO DE UN PROYECTO.
+
+1- Diseño del DbContext y las Entidades del Modelo.
+
+2- Migración para crear y actualizar diseño de la BD.
+
+3- Scaffolding de las Entidades para obtener sus controladores y vistas para un CRUD completo, preferiblemente a MVC.
+
+4- Desarrollar la capa de Servicio que permite las funcionalidades de Ordenamiento, Filtro, Paginado.
+
+5- Cambiar el uso del DBContext por nuestra clase de la capa de Servicio.
+
+6- Actualizar las vistas Index con las funcionalidades de Ordenamiento, Filtro, Paginado.
+
+7- Desarrollar las funcionalidades relacionadas con la Autenticación y la Autorización.
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+IMPORTANTE:
+
+Para la implementación de las funcionalidades de Ordenamiento, Filtro, Paginado desarrollaremos varios métodos extensiones 
+para implementar cada una de esas funcionalidades por separado, en forma de queries simples.
+
+Estos métodos deben implementar el patrón "Query Object" que toma un dato IQueryable<T> y retorna otro IQueryable<T>.
+Una alterativa a este patrón es Repository.
+
+Este patrón permite concatenar el llamado a esos métodos simples a través de LINQ para lograr el resultado de un query compleja.
+
+Ejemplo:
+
+public static IQueryable<Book> Sort(this IQueryable<Book> books, OrderOptions options) {}
+
+public static IQueryable<Book> Filter(this IQueryable<Book> books, FilterOptions filter) {}
+
+public static IQueryable<Book> GetPage(this IQueryable<Book> books, int PageSize, int PageNumber) {}
+
+
+para armar la consulta:
+
+	_context.Books
+	    .AsNoTraking()
+		.Sort("Name ASC")
+		.Filter("Name like '%Euro%'")
+		.GetPage(10, 2)
+		.ToArray();
+		
+		
+		
+	
+	
+	
+	
+
+
+
+

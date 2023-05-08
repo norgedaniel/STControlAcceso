@@ -1,0 +1,111 @@
+----------------------------------------------------------------------------------------------------------------------
+ViewData: 
+Es utilizado para pasar datos del controller a la vista, ya que su duración es solo durante el actual request.
+Una vez que este termina, este dato se habrá borrado, de ahi que su uso es solo temporal.
+Comúnmente es usado para mandar mensajes de error a la vista.
+
+Ejemplo:
+
+	En el controller:
+		ViewData["nombre"] = "Pedro";
+		ViewData["apellido"] = "Pérez";
+		
+	En la vista:
+		Mi nombre es @ViewData["nombre"] @ViewData["apellido"]
+		
+	En la página se obtiene:
+		Mi nombre es Pedro Pérez
+		
+
+IMPORTANTE: 
+	1- ViewData funciona como un diccionario, vector, arreglo que sólo permite almacenar valores simples como un string, número.
+	   Si se intenta guardar un valor complejo como un objeto se obtendrá un error de que ASP.NET no puede serializar dicho objeto.
+	   La solución más factible para esto implementar un ToString() para la clase de ese objeto, junto con un método Parse()
+	   que construya el objeto a partir del string cdo se haga necesario.
+
+		
+		
+----------------------------------------------------------------------------------------------------------------------
+ViewBag:
+Se utiliza para pasar datos del controller a la vista, su duración también es solo durante el request actual, 
+y una vez terminado este, el dato es borrado, a diferencia del ViewData, este se utiliza para pasar objetos, 
+es decir se utiliza directamente y no se necesita tratar como arreglo.
+
+Ejemplo:
+
+	En el controller:
+		ViewBag.nombreCompleto = "Pedro Pérez";
+		
+	En la vista:
+		Mi nombre es @ViewBag.nombreCompleto 
+		
+	En la página se obtiene:
+		Mi nombre es Pedro Pérez
+
+
+	
+----------------------------------------------------------------------------------------------------------------------
+TempData:
+permite pasar datos de un request a otro. 
+Si estamos en una acción (dentro del controller), podemos guardar el dato y utilizarlo en el siguiente request.
+Al igual que el ViewData, este se utiliza como un vector. 
+
+Ejemplo:
+
+	En el controller:
+		public ActionResult Index()
+		{
+			TempData[“nombreCompleto”] = "Pedro Pérez";
+			return RedirectToAction("MuestraNombre");
+		}
+
+		este método del controller redirige a otro request.
+		
+		public ActionResult MuestraNombre()
+		{
+			string miNombre;
+			miNombre = TempData["nombreCompleto"].ToString();
+			return View(miNombre);
+		}
+		
+IMPORTANTE: 
+	1- TempData funciona como un diccionario, vector, arreglo que sólo permite almacenar valores simples como un string, número.
+	   Si se intenta guardar un valor complejo como un objeto se obtendrá un error de que ASP.NET no puede serializar dicho objeto.
+	   La solución más factible para esto implementar un ToString() para la clase de ese objeto, junto con un método Parse()
+	   que construya el objeto a partir del string cdo se haga necesario.
+
+	2- Cada vez que se hace una lectura de un valor desde TempData, esa entrada de TempData se pierde, deja de existir 
+	   y cualquier consulta posterior será igual a null.
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+Session:
+Persiste por mas tiempo, este no muere en los siguientes request’s.
+Al igual de los anteriores, se puede guardar cualquier dato y este se almacena.
+Ejemplo:
+
+	En el controller:
+		public ActionResult Index()
+		{
+			System.Web.HttpContext.Current.Session["nombreCompleto "] = "Pedro Pérez";
+			return RedirectToAction("MuestraNombre");
+		}  
+
+		public ActionResult MuestraNombre()
+		{
+			string miNombre;
+			miNombre = System.Web.HttpContext.Current.Session["nombreCompleto "].ToString();
+			return View(miNombre);
+		}
+
+
+IMPORTANTE: Pendiente probar si se puede almacenar un objeto y no da error de Serialización.
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+Tomado desde: 
+https://www.tiracodigo.com/index.php/programacion/mvc/formas-de-almacenar-datos-temporales-en-asp-net-mvc-viewdata-viewbag-tempdata-y-session
+

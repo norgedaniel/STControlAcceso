@@ -1,0 +1,36 @@
+Tengo 18 rec		aaaaa aaaaa aaaaa aaa
+
+size: 5		page: 1		pude tomar 5 rec
+size: 5		page: 2		pude tomar 5 rec
+size: 5		page: 3		pude tomar 5 rec
+
+size: 5		page: 4		pude tomar 3 rec
+
+size: 5		page: 5		pude tomar 0 rec
+
+Workflow:
+
+1- Calcular y retornar la cantidad_paginas tomando en cuenta la cantidad de items y el tamaño_pagina
+
+2- si numero_pagina > cantidad_paginas => numero_pagina = cantidad_paginas
+
+3- hacer seek y tomar la cantidad de items según tamaño_pagina
+
+4- si cantidad_rec encontrados es cero => decrementar numero_pagina => ir a 3
+   el lazo de ir a 3 termina cdo numero_pagina = 1
+   
+5- Retornar cantidad_paginas y numero_pagina
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

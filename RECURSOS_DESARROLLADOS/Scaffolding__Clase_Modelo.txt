@@ -1,0 +1,144 @@
+---------------------------------------------------------------------------------------------------------------------------------
+Es posible hacer Scaffolding sobre una Entidad de nuestro Modelo de Entidades, 
+orientado lo mismo a un esquema de trabajo tipo MVC o para Razor pages,
+generando el controlador y las vistas necesarios para un CRUD completo.
+
+Para ello:
+
+- nuestra clase DbContext debe tener un constructor público por defecto, sin parámetros.
+
+- la clase DbContext debe tener un DbSet para la Entidad a la que deseamos hacer Scaffolding.
+
+
+Para MVC las vistas se generan sobre la debida subcarpeta dentro de Views.
+Pero el controlador es guardado en la raíz del proyecto; por lo que es aconsejable moverlo a la carpeta de Controllers.
+
+
+Para Razor páginas razors se crean directo en la raiz del proyecto sin ninguna organización de carpetas 
+y sin distinguir los nombres de los archivos a cuál Entidad se refieren.
+Se genera además el archivo _ValidationScriptsPartial.cshtml dentro de la carpeta Pages.
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+Scaffolding orientado a MVC:
+
+En este tipo de Scaffolding ASP.Net Core crea el controlador y las vistas necesarios para una navegación y CRUD completos.
+Habilitando todos los enlaces necesarios para una completa navegación. 
+En todo momentos personaliza las etiquetas sobre los atributos tomando en cuenta la anotación [Display(Name = "xxxx")]
+definida para cada atributo.
+
+Podemos lo mismo trabajar directo con nuestras clases del modelo, o crear nuestras clases DTO a las que podemos hacer el scaffolding.
+Aunque en este caso, debemos luego implementar nuestra capa de servicio y hacer los cambios necesarios en el controlador, así como
+el registro de esta clase de servicio en Program.cs para garantizar la inyección de dependencias.
+
+Desarrollaremos los métodos extensiones sobre la clase del Modelo o sobre la clase DTO, para garantizar las funcionalidades de
+Paginado, Ordenamiento y Filtros.
+
+Seguridad y Permisos en los accesos:
+El Scaffolding genera por defecto las opciones de Editar, Eliminar para el protocolo GET, ejemplos:
+	GET: Controlador/Edit/5   GET: Controlador/Delete/5
+por lo que si no se garantiza una debida gestión de los permisos de acceso, se corre un riesgo alto.
+Es muy IMPORTANTE acometer una correcta gestión de los permisos de acceso, dejando de mostrar los enlaces de crear, editar, eliminar
+a las personas no autorizadas, y en todas esas opciones, validando primero, si se trata de un usuario autenticado y con el 
+debido derecho.
+
+
+La Navegación:
+- Para la acción Index() es recomendable que enviemos los datos a un Array en vez de Lista y que hagamos uso del AsNoTraking()
+  en aras de ganar en eficiencia.
+- La vista recibe como modelo un IEnumerable<T>.  
+
+La eliminación:
+- Se genera un Delete() para GET que es invocado desde el grid de registros, mostrando un formulario de confirmación.
+  Por tanto se podría acceder mediante: Controlador/Delete/5
+  Si se confirma la eliminación se invoca a un DeleteConfirmed() mediante POST.
+  Es importante aquí garantizar el control de acceso a esta opción Delete de GET, mediante la validación del usuario
+  autenticado y con el debido permiso.
+  
+La Edición:
+- Se genera un Edit() para GET que es invocado desde el grid de registros, mostrando el formulario para la edición.
+  Por tanto se podría acceder mediante: Controlador/Edit/5
+
+  Si se confirma la edición se invoca al Edit() de POST para hacer las validaciones y mandar a guardar el registro.
+
+  Aquí se hace uso de la anotación [ValidateAntiForgeryToken] para preveer contra un ataque de robo de identidad del usuario conectado.
+
+  Se restringe bien el Model Binding, señalando los atributos el modelo que exactamente deseamos actualizar, por si el form
+  muestra o capta otros datos que no son de interés:
+		[HttpPost]
+		public IActionResult OnPost(
+		[Bind("LastName,FirstMidName,HireDate")] Instructor instructor)
+	
+  Es importante aquí garantizar el control de acceso a esta opción Edit de GET, mediante la validación del usuario
+  autenticado y con el debido permiso.
+
+La Adición:
+- Funciona similar a la Edición, sólo que en el envío a Add() por GET, se genera un form en blanco, 
+  y luego con el envío a Add() por POST se procede a crear el nuevo registro.
+
+  
+  
+---------------------------------------------------------------------------------------------------------------------------------
+  
+IMPORTANTE:	ASP.NET Core implements antiforgery using ASP.NET Core Data Protection. 
+Antiforgery middleware is added to the Dependency injection container when one of the following APIs is called in Program.cs:  
+	AddMvc, MapRazorPages, MapControllerRoute, MapBlazorHub.
+	
+The automatic generation of antiforgery tokens for HTML form elements happens when the <form> tag contains the method="post" attribute 
+and either of the following are true:
+	The action attribute is empty (action="").
+	The action attribute isn't supplied (<form method="post">).	
+	
+The most common approach to defending against CSRF attacks is to use the Synchronizer Token Pattern (STP). 
+STP is used when the user requests a page with form data:
+
+	1- The server sends a token associated with the current user's identity to the client.
+	2- The client sends back the token to the server for verification.
+	3- If the server receives a token that doesn't match the authenticated user's identity, the request is rejected.	
+
+The token is unique and unpredictable. The token can also be used to ensure proper sequencing of a series of requests 
+(for example, ensuring the request sequence of: page 1 > page 2 > page 3). 
+All of the forms in ASP.NET Core MVC and Razor Pages templates generate antiforgery tokens. 
+
+Este es el caso cuando el Servidor al generar una página con un Form, incluye un <input> oculto, con valor encriptado (token)
+Cuando el servidor recibe el form de vuelta, compara el valor del <input> oculto recibido, para validar que exactamente está
+recibiendo datos desde la página y el form que había generado antes.
+
+Ejemplo de campo oculto generado:
+        <input name="__RequestVerificationToken" type="hidden" value="CfDJ8ATxkRUPITFFpTzDSFQpNqXZ9tkAx78wIF1BExC6ADrVhH6GibXZB4PdJzcDLb23Eq6gprQkJWDcHiLmnuRLX5k14dWdnNcTa7f6Hu4mLdP1J-Kfjl_UksNmCaTkdDzoFrUU-oe4scIkrGgQpU4KMlc" /></form>
+    	<input name="__RequestVerificationToken" type="hidden" value="CfDJ8ATxkRUPITFFpTzDSFQpNqVaPsyFJqxMbAjloTQV5JkUvypwOCvays9TyWdv5PCrIqjkRSUNMqtvWyW8ejATNeUymlmNo51jZpRLq_1F1sfYHxv-PwtK0qNjdtXCvtlUj1-9QMHfTDsRtZFX99RzfbM" /></form>
+
+Se puede consultar a través del código fuente del navegador. 
+Notar como se generaron tokens diferentes para cada llamado de una página de Editar un registro.
+
+Explicitly add an antiforgery token to a <form> element without using Tag Helpers with the HTML helper @Html.AntiForgeryToken:
+
+	<form asp-action="Index" asp-controller="Home" method="post">
+		@Html.AntiForgeryToken()
+
+		<!-- ... -->
+	</form>
+
+
+	
+  
+  
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------------------
+IMPORTANTE:Existe Scaffolding también para adicionar el código necesario para hacer uso del framework de Identidad de Microsoft.
+Microsoft.Core.Identity
+
+
+
+
+ 

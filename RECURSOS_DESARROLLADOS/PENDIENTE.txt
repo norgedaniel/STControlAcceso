@@ -1,0 +1,12 @@
+pendiente:
+
+1- hacer el JSON.Serialize y Deserialize de ZonaHorariaQueryOptions. DONE
+
+2- en GetZonasHorariasAsync, pasar ZonaHorariaQueryOptions como referencia, pq dentro se actualizan los datos de paginado. DONE
+
+3- actualizar TempData luego de invocar a GetZonasHorariasAsync. DONE
+
+
+4- el paginado no está retornando bien CantPaginas ni PageNumber.
+
+5- hay lógica dentro de ZonaHorariaExtension.Pagina() que pueden ponerse como métodos de PageOptions.

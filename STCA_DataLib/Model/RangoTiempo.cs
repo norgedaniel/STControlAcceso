@@ -18,13 +18,15 @@ namespace STCA_DataLib.Model
 
         [Required]
         [MaxLength(10)]
-        [Display(Name = "Día de la Semana")]
+        [Display(Name = "Día Semana")]
         public string DiaSemana { get; set; } = string.Empty;
 
         [Required]
+        [Display(Name = "Hora Inicial")]
         public TimeSpan HoraInicial { get; set; }
 
         [Required]
+        [Display(Name = "Hora Final")]
         public TimeSpan HoraFinal { get; set; }
 
         public ICollection<ZonaHoraria_RangoTiempo>? ZonaHoraria_RangoTiempo { get; set; }

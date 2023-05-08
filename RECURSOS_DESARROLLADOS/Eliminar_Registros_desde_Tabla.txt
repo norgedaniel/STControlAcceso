@@ -1,0 +1,120 @@
+Variantes para eliminar registros mostrados en una tabla.
+
+----------------------------------------------------------------------------------------------------------------------------
+1- Definir una columna que implemente un formulario para cada fila con un botón de Eliminar y un campo oculto con el ID a eliminar.
+
+Se programa un controlador que reciba el ID.
+
+<table class="table table-hover">
+	<thead>
+		<tr>
+			<td></td>
+			<td>Nombre</td>
+		</tr>
+
+	</thead>
+	@foreach (var item in Model.items)
+	{
+		<tr>
+			<td>
+				<form asp-action="Delete" method="post">
+					<button>Del</button>
+					<input type="hidden" name="id" value="@item.Id">
+				</form>
+			</td>
+			<td>@item.Nombre</td>
+		</tr>
+	}
+</table>
+
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Delete(int id)
+{
+	if (!ModelState.IsValid )
+		return RedirectToAction(nameof(Index));
+
+	bool ok = await _STCA_DbService.DeleteZonaHorariaAsync(id);
+	//if (!ok)
+	//    return BadRequest("No se pudo adicionar la nueva Zona Horaria.");
+
+	return RedirectToAction(nameof(Index));
+
+}
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------
+2- Definir una columna con checkbox para seleccionar los que se deseen eliminar. El value del checkbox almacenará el ID del record.
+   Implementar un botón al final que invoque a un javascript para recorrer la lista de checkbox buscando los seleccionados. 
+   Con los seleccionados encontrados, armar un string en forma "2,5,23" para enviar al controlador.
+
+ubicar en la vista antes de definir el DIV con la tabla que muestra los datos.
+@section Scripts{
+    <script type="text/javascript">
+
+        function delSubmit() {
+
+            var form = $("#delForm");
+            let itemsId = separador = '';
+
+            document.querySelectorAll('.done-checkbox').forEach(function (checkElement) {
+                if (checkElement.checked) {
+                    checkElement.disabled = true;
+                    itemsId = itemsId + separador + checkElement.value;
+                    separador = ',';
+                }
+            });
+
+            var lista = document.getElementById("itemsId");
+
+            lista.value = itemsId;
+
+            form.submit();
+
+        }
+
+    </script>
+}
+ 
+ 
+<table class="table table-hover">
+        <thead>
+            <tr>
+                <td>&#10003</td>
+                <td>Nombre</td>
+            </tr>
+
+        </thead>
+        @foreach (var item in Model.items)
+        {
+            <tr>
+                <td>
+                    <input class="done-checkbox" type="checkbox" value="@item.Id">
+                </td>
+                <td>@item.Nombre</td>
+            </tr>
+        }
+    </table>
+
+
+
+a continuación de la tabla, como pie de la misma:
+
+<div class="panel-footer add-item-form">
+    <table>
+        <tr>
+            <td>
+                <form id="delForm" method="post" asp-action="Delete">
+                    <input type="button" value="Eliminar" id="Save" onclick="javascript:delSubmit()" />
+                    <input type="hidden" name="itemsId" id="itemsId" />
+                </form>
+            </td>
+            <td>
+                @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+            </td>
+        </tr>
+    </table>
+</div>
