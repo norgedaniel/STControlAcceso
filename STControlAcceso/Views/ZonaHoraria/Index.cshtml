@@ -1,4 +1,4 @@
-﻿@model ZonaHorariaViewModel
+﻿@model ZonaHorariaViewModel;
 
 @using STCA_WebApp.Extensions;
 
@@ -40,34 +40,31 @@
 
     <table class="table table-hover">
         <thead>
+            <form method="post" asp-action="RefrescaForm">
             <tr>
                 <td>&#10003</td>
                 <td>
-                    <a asp-action="Index" asp-route-getOption="NOMBRE">Nombre</a>
+                    <input type="submit" name="request" class="" value="NOMBRE" />
                 </td>
                 <td>
-                    <form method="post" asp-action="RefrescaForm">
-                        <label class="control-label">Tamaño de página:</label>
-                        <select name="PageZise" class="form-control" asp-items="@ViewBag.pageZiseOptions"></select>
-                        <button type="submit">Refrescar</button>
-                    </form>
+                    <label class="control-label">Tamaño de página:</label>
+                    <select name="pageZise" class="form-control" asp-items="@Model.PageZiseOptions"></select>
+                    <input type="submit" class="" value="Refrescar" />
                 </td>
-                @{
-                    //if (ViewBag.PagingOption.PagesCount > 1)
-                    //{
-                    //    <td>
-                    //        <a asp-controller="ZonaHoraria" asp-route-getOption="INI">&#60;&#60;</a>&#32;&#32;&#32;&#32;
-                    //        <a asp-controller="ZonaHoraria" asp-route-getOption="ANT">&#60;</a>&#32;&#32;&#32;&#32;
-                    //        @{
-                    //            ViewBag.PagingOption.PageNumberZeroBase++;
-                    //        }
-                    //        Página @ViewBag.PagingOption.PageNumberZeroBase de @ViewBag.PagingOption.PagesCount
-                    //        <a asp-controller="ZonaHoraria" asp-route-getOption="SIG">&#62;</a>&#32;&#32;&#32;&#32;
-                    //        <a asp-controller="ZonaHoraria" asp-route-getOption="FIN">&#62;&#62;</a>&#32;&#32;&#32;
-                    //    </td>
-                    //}
-                }
+                <td>
+                        @{
+                            Model.PageNumberZeroBase++;
+                            bool disabled_UNO = Model.PageNumberZeroBase == 1;
+                            bool disabled_LAST = Model.PageNumberZeroBase == Model.PagesCount;
+                        }
+                    <input type="submit" name="request" class="" value="<<" disabled="@disabled_UNO" />
+                    <input type="submit" name="request" class="" value="<" disabled="@disabled_UNO" />
+                    <span>Página @Model.PageNumberZeroBase / @Model.PagesCount</span>
+                    <input type="submit" name="request" class="" value=">" disabled="@disabled_LAST" />
+                    <input type="submit" name="request" class="" value=">>" disabled="@disabled_LAST" />
+                </td>
             </tr>
+            </form>
 
         </thead>
         @foreach (var item in Model.Items)

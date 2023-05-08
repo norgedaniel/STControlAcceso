@@ -8,7 +8,11 @@ namespace STCA_WebApp.Services
 {
     public interface ISTCA_DbService
     {
-        Task<ZonaHorariaListDTO> GetZonasHorariasAsync(ZonaHorariaPagingOptions zonaHorariaQueryOptions);
+        Task<ZonaHorariaListDTO> GetZonasHorariasAsync(int currentPageNumberZeroBase = 0,
+                                                       int currentPageZise = PagingOptions.DEFAULT_PAGE_SIZE,
+                                                       int pagesCount = 0,
+                                                       string pagingActionRequest = "",
+                                                       string SortFieldName = "", bool SortOrderDesc = false);
 
         Task<bool> CreateZonaHorariaAsync(ZonaHoraria item);
 

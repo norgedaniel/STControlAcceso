@@ -7,7 +7,9 @@ namespace STCA_WebApp.DTO
     {
         public ZonaHorariaDTO[] Items { get; set; } = new ZonaHorariaDTO[0];
 
-        public PagingOptions PagingOptions { get; set; } = new();
+        public int PageNumberZeroBase = 0;
+        public int PageZise = PagingOptions.DEFAULT_PAGE_SIZE;
+        public int PagesCount = 0;
 
     }
 }

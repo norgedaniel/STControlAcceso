@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using Shared;
 using STCA_DataLib.Data;
 using STCA_DataLib.Model;
@@ -35,22 +36,25 @@ namespace STCA_WebApp.Services
 
         }
 
-        public async Task<ZonaHorariaListDTO> GetZonasHorariasAsync(ZonaHorariaPagingOptions zonaHorariaQueryOptions)
+        public async Task<ZonaHorariaListDTO> GetZonasHorariasAsync(int currentPageNumberZeroBase = 0,
+                                                                    int currentPageZise = PagingOptions.DEFAULT_PAGE_SIZE,
+                                                                    int pagesCount = 0,
+                                                                    string pagingActionRequest = "",
+                                                                    string SortFieldName = "", bool SortOrderDesc = false)
         {
-            if (zonaHorariaQueryOptions == null) zonaHorariaQueryOptions = new();
-
-            PagingOptions pagingOptionsTemp = zonaHorariaQueryOptions.PagingOptions;
 
             var items = await _dbContext.ZonasHorarias.AsNoTracking()
                 .MapZonaHorariaToDto()
-                .Ordenar(zonaHorariaQueryOptions.OrderbyOption)
-                .Pagina(ref pagingOptionsTemp)
+                .Ordenar(SortFieldName, SortOrderDesc)
+                .Pagina(ref currentPageNumberZeroBase, ref currentPageZise, ref pagesCount, pagingActionRequest)
                 .ToArrayAsync();
 
             return new ZonaHorariaListDTO
             {
                 Items = items,
-                PagingOptions = pagingOptionsTemp
+                PageNumberZeroBase = currentPageNumberZeroBase,
+                PageZise = currentPageZise,
+                PagesCount = pagesCount
             };
 
         }

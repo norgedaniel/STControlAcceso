@@ -8,14 +8,6 @@ namespace STCA_WebApp.Extensions
     {
         public const int DEFAULT_PAGE_SIZE = 10;
 
-        public int PageZise { get; set; } = DEFAULT_PAGE_SIZE;
-
-        public int PageNumberZeroBase { get; set; }
-
-        public int PagesCount { get; set; }
-
-        public PagingOptions() { }
-
         public static List<SelectListItem> GetPageZiseOptions(int DefaultValue = DEFAULT_PAGE_SIZE)
         {
             List<SelectListItem> lista = new()

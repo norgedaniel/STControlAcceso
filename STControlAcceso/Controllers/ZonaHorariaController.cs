@@ -16,10 +16,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http.Features;
 using System.Net.NetworkInformation;
+using Azure.Core;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace STCA_WebApp.Controllers
 {
-    [BindProperties]
     public class ZonaHorariaController : Controller
     {
         private readonly ISTCA_DbService _STCA_DbService;
@@ -30,19 +31,19 @@ namespace STCA_WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RefrescaForm(PagingOptions pagingOptions)
+        public async Task<IActionResult> RefrescaForm(string request, int pageZise)
         {
-            return View("Index", await GetModel(pagingOptions));
+            return await GetModel(request, pageZise);
         }
 
 
         // GET: ZonaHorariaController
-        public async Task<IActionResult> Index(string getOption)
+        public async Task<IActionResult> Index()
         {
-            return View("Index", await GetModel(null, getOption));
+            return await GetModel();
         }
 
-        private async Task<ZonaHorariaViewModel> GetModel(PagingOptions? pagingOptions = null, string getOption = "")
+        private async Task<IActionResult> GetModel(string request = "", int newPageZise = 0)
         {
             /*
              * getOptions indica una acción de ordenamiento o paginado, acometida por el usuario para realizar la búsqueda de los datos soicitados.
@@ -54,75 +55,61 @@ namespace STCA_WebApp.Controllers
              * 
              */
 
-            if (getOption == null)
-                getOption = string.Empty;
+            // los valores almacenados en TempData son eliminados luego de su primera lectura  
+            string sortField = (string)(TempData["LastSortField"] ?? "NOMBRE");
+            bool sortOrderDesc = (bool)(TempData["LastSortOrderDesc"] ?? false);
+
+            int pageNumberZeroBase = (int)(TempData["PageNumberZeroBase"] ?? 0);
+
+            int pageZise;
+            if (newPageZise > 0)
+                pageZise = newPageZise;
             else
-                getOption = getOption.ToUpper();
+                pageZise = (int)(TempData["PageZise"] ?? PagingOptions.DEFAULT_PAGE_SIZE);
 
-            string strOpcionesPaginado = "INI,ANT,SIG,FIN";
+            int pagesCount = (int)(TempData["PagesCount"] ?? 0);
 
+            string pagingActionRequest = string.Empty;
 
-            // con esta asignación, desaparece TempData["ZonaHorariaPagingOptions"], se hace null
-            var tempData = TempData["ZonaHorariaPagingOptions"];
-            ZonaHorariaPagingOptions zonaHorariaPagingOptions = ZonaHorariaPagingOptions.Deserialize(tempData);
-            if (pagingOptions != null)
-                zonaHorariaPagingOptions.PagingOptions = pagingOptions;
+            if (!request.IsNullOrEmpty())
+            {
+                request = request.Trim().ToUpper();
 
-
-            if (!getOption.IsNullOrEmpty())
-                if (strOpcionesPaginado.Contains(getOption))
-                {
-                    // se solicita un paginado
-                    switch (getOption)
-                    {
-                        case "INI":
-                            zonaHorariaPagingOptions.PagingOptions.PageNumberZeroBase = 0;
-                            zonaHorariaPagingOptions.PagingOptions.PageZise = 3;
-                            break;
-
-                        case "ANT":
-                            zonaHorariaPagingOptions.PagingOptions.PageNumberZeroBase--;
-                            break;
-
-                        case "SIG":
-                            zonaHorariaPagingOptions.PagingOptions.PageNumberZeroBase++;
-                            break;
-
-                        case "FIN":
-                            zonaHorariaPagingOptions.PagingOptions.PageNumberZeroBase = zonaHorariaPagingOptions.PagingOptions.PagesCount;
-                            zonaHorariaPagingOptions.PagingOptions.PageZise = 30;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
+                if (request == "<<" || request == "<" || request == ">" || request == ">>")
+                    pagingActionRequest = request;
                 else
                 {
-                    // se puede estar solicitando un ordenamiento
-                    if (getOption == "NOMBRE") zonaHorariaPagingOptions.ConmutaOrderbyNombre();
+                    sortField = request;
+                    sortOrderDesc = !sortOrderDesc;
                 }
 
+             }
 
             // la actualización de TempData debe hacerse después de correr _STCA_DbService.GetZonasHorariasAsync
             // pues dentro de ese llamado puede actualizarse los datos del paginado
-            ZonaHorariaListDTO zonaHorariaListDTO = await _STCA_DbService.GetZonasHorariasAsync(zonaHorariaPagingOptions);
+            ZonaHorariaListDTO zonaHorariaListDTO = await _STCA_DbService.GetZonasHorariasAsync(pageNumberZeroBase, pageZise, pagesCount, pagingActionRequest,
+                                                                                                sortField, sortOrderDesc);
 
-            // actualizando zonaHorariaPagingOptions y guardándola en el diccionaro para mantener memoria en el controlador
-            zonaHorariaPagingOptions.PagingOptions = zonaHorariaListDTO.PagingOptions;
-            TempData["ZonaHorariaPagingOptions"] = JsonConvert.SerializeObject(zonaHorariaPagingOptions);
+            // actualizando TempData para mantener memoria en el controlador
+            TempData["LastSortField"] = sortField;
+            TempData["LastSortOrderDesc"] = sortOrderDesc;
 
-            // seteando valores para la vista
-            ViewBag.pageZiseOptions = PagingOptions.GetPageZiseOptions(zonaHorariaListDTO.PagingOptions.PageZise);
-            ViewBag.PagingOption = zonaHorariaListDTO.PagingOptions;
+            TempData["PageNumberZeroBase"] = zonaHorariaListDTO.PageNumberZeroBase;
+            TempData["PageZise"] = zonaHorariaListDTO.PageZise;
+            TempData["PagesCount"] = zonaHorariaListDTO.PagesCount;
 
-            // retornando un nuevo modelo
-            return new()
+            // retornando modelo a la vista
+            return View("Index", new ZonaHorariaViewModel
             {
-                Items = zonaHorariaListDTO.Items
-            };
+                Items = zonaHorariaListDTO.Items,
+                PageNumberZeroBase = zonaHorariaListDTO.PageNumberZeroBase,
+                PagesCount = zonaHorariaListDTO.PagesCount,
+                PageZiseOptions = PagingOptions.GetPageZiseOptions(zonaHorariaListDTO.PageZise)
+            });
 
         }
+
+
 
         // POST: ZonaHorariaController/Create
         [HttpPost]
