@@ -83,7 +83,7 @@ namespace STCA_WebApp.Controllers
                     sortOrderDesc = !sortOrderDesc;
                 }
 
-             }
+            }
 
             // la actualización de TempData debe hacerse después de correr _STCA_DbService.GetZonasHorariasAsync
             // pues dentro de ese llamado puede actualizarse los datos del paginado
@@ -104,7 +104,9 @@ namespace STCA_WebApp.Controllers
                 Items = zonaHorariaListDTO.Items,
                 PageNumberZeroBase = zonaHorariaListDTO.PageNumberZeroBase,
                 PagesCount = zonaHorariaListDTO.PagesCount,
-                PageZiseOptions = PagingOptions.GetPageZiseOptions(zonaHorariaListDTO.PageZise)
+                PageZiseOptions = PagingOptions.GetPageZiseOptions(zonaHorariaListDTO.PageZise),
+                LastSortField = sortField,
+                LastSortOrderDesc = sortOrderDesc
             });
 
         }

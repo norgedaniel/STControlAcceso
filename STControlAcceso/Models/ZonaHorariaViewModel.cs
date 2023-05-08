@@ -16,5 +16,9 @@ namespace STCA_WebApp.Models
 
         public List<SelectListItem> PageZiseOptions = PagingOptions.GetPageZiseOptions();
 
+        public string LastSortField = string.Empty;
+
+        public bool LastSortOrderDesc = false;
+
     }
 }
