@@ -16,7 +16,7 @@ namespace STCA_DataLib.Model
         [Display(Name = "Nombre")]
         public string Nombre { get; set; } = string.Empty;
 
-        public ICollection<ZonaHoraria_RangoTiempo>? ZonaHoraria_RangoTiempo { get; set; }
+        public ICollection<ZonaHoraria_RangoTiempo> ZonaHoraria_RangoTiempo { get; set; }
 
     }
 }

@@ -29,7 +29,7 @@ namespace STCA_DataLib.Model
         [Display(Name = "Hora Final")]
         public TimeSpan HoraFinal { get; set; }
 
-        public ICollection<ZonaHoraria_RangoTiempo>? ZonaHoraria_RangoTiempo { get; set; }
+        public ICollection<ZonaHoraria_RangoTiempo> ZonaHoraria_RangoTiempo { get; set; }
 
     }
 }

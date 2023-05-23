@@ -43,7 +43,8 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("DiaSemana", "HoraInicial", "HoraFinal");
+                    b.HasIndex("DiaSemana", "HoraInicial", "HoraFinal")
+                        .IsUnique();
 
                     b.ToTable("RANGO_TIEMPO", (string)null);
                 });
@@ -63,7 +64,8 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("Nombre");
+                    b.HasIndex("Nombre")
+                        .IsUnique();
 
                     b.ToTable("ZONA_HORARIA", (string)null);
                 });

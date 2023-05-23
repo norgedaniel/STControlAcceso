@@ -12,8 +12,8 @@ using STCA_DataLib.Data;
 namespace STCA_DataLib.Migrations
 {
     [DbContext(typeof(MSSQL_STCA_DbContext))]
-    [Migration("20230427170741_incial")]
-    partial class incial
+    [Migration("20230523053242_Inicio")]
+    partial class Inicio
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,7 +46,8 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("DiaSemana", "HoraInicial", "HoraFinal");
+                    b.HasIndex("DiaSemana", "HoraInicial", "HoraFinal")
+                        .IsUnique();
 
                     b.ToTable("RANGO_TIEMPO", (string)null);
                 });
@@ -66,7 +67,8 @@ namespace STCA_DataLib.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasAlternateKey("Nombre");
+                    b.HasIndex("Nombre")
+                        .IsUnique();
 
                     b.ToTable("ZONA_HORARIA", (string)null);
                 });

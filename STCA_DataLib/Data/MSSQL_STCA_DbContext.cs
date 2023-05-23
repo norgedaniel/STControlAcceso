@@ -5,6 +5,7 @@ using STCA_DataLib.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,12 +36,12 @@ namespace STCA_DataLib.Data
 
             // ZonaHoraria
             modelBuilder.Entity<ZonaHoraria>().ToTable("ZONA_HORARIA");
-            modelBuilder.Entity<ZonaHoraria>().HasAlternateKey("Nombre");
+            modelBuilder.Entity<ZonaHoraria>().HasIndex(b => b.Nombre).IsUnique();
 
 
             // RangoTiempo
             modelBuilder.Entity<RangoTiempo>().ToTable("RANGO_TIEMPO");
-            modelBuilder.Entity<RangoTiempo>().HasAlternateKey(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal });
+            modelBuilder.Entity<RangoTiempo>().HasIndex(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal }).IsUnique();
 
 
             // ZonaHoraria_RangoTiempo

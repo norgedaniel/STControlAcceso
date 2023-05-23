@@ -1,0 +1,110 @@
+﻿@model ZonaHorariaViewModel;
+
+@using STCA_WebApp.Extensions;
+
+
+@{
+    ViewData["Title"] = "Zonas Horarias";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+
+        function delSubmit() {
+
+            var form = $("#delForm");
+            let itemsId = separador = '';
+
+            document.querySelectorAll('.done-checkbox').forEach(function (checkElement) {
+                if (checkElement.checked) {
+                    checkElement.disabled = true;
+                    itemsId = itemsId + separador + checkElement.value;
+                    separador = ',';
+                }
+            });
+
+            var lista = document.getElementById("itemsId");
+
+            lista.value = itemsId;
+
+            form.submit();
+
+        }
+
+    </script>
+}
+
+<div class="panel panel-default">
+
+    <div class="panel-heading">@ViewData["Title"]</div>
+
+    <table class="table table-hover">
+        <thead>
+            <form method="post" asp-action="RefrescaForm">
+            <tr>
+                <td>&#10003</td>
+                    @{
+                        string sortOrder = Model.LastSortOrderDesc ? "DESC" : "ASC";
+                    }
+                <td>
+                    <input type="submit" name="request" class="" value="Nombre" />
+                        @{
+                            if (Model.LastSortField.Trim().ToUpper() == "NOMBRE")
+                            {
+                            <span>@sortOrder</span>
+                            }
+                        }
+                </td>
+                <td>
+                    <label class="control-label">Tamaño de página:</label>
+                    <select name="pageZise" class="form-control" asp-items="@Model.PageZiseOptions"></select>
+                    <input type="submit" class="" value="Refrescar" />
+                </td>
+                <td>
+                        @{
+                            Model.PageNumberZeroBase++;
+                            bool disabled_UNO = Model.PageNumberZeroBase == 1;
+                            bool disabled_LAST = Model.PageNumberZeroBase == Model.PagesCount;
+                        }
+                    <input type="submit" name="request" class="" value="<<" disabled="@disabled_UNO" />
+                    <input type="submit" name="request" class="" value="<" disabled="@disabled_UNO" />
+                    <span>Página @Model.PageNumberZeroBase / @Model.PagesCount</span>
+                    <input type="submit" name="request" class="" value=">" disabled="@disabled_LAST" />
+                    <input type="submit" name="request" class="" value=">>" disabled="@disabled_LAST" />
+                </td>
+            </tr>
+            </form>
+
+        </thead>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>
+                    <input class="done-checkbox" type="checkbox" value="@item.Id">
+                </td>
+                <td>@item.Nombre</td>
+            </tr>
+        }
+    </table>
+
+</div>
+
+<div class="panel-footer add-item-form">
+    <table>
+        <tr>
+            <td>
+                <form id="delForm" method="post" asp-action="Delete">
+                    <input type="button" value="Eliminar" id="Save" onclick="javascript:delSubmit()" />
+                    <input type="hidden" name="itemsId" id="itemsId" />
+                </form>
+            </td>
+            <td>
+                @await Html.PartialAsync("AddItemPartial", new ZonaHoraria())
+            </td>
+        </tr>
+    </table>
+</div>
+
+
+
+

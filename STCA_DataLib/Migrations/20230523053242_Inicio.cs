@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace STCA_DataLib.Migrations
 {
     /// <inheritdoc />
-    public partial class incial : Migration
+    public partial class Inicio : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -24,7 +24,6 @@ namespace STCA_DataLib.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RANGO_TIEMPO", x => x.Id);
-                    table.UniqueConstraint("AK_RANGO_TIEMPO_DiaSemana_HoraInicial_HoraFinal", x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal });
                 });
 
             migrationBuilder.CreateTable(
@@ -38,7 +37,6 @@ namespace STCA_DataLib.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ZONA_HORARIA", x => x.Id);
-                    table.UniqueConstraint("AK_ZONA_HORARIA_Nombre", x => x.Nombre);
                 });
 
             migrationBuilder.CreateTable(
@@ -64,6 +62,18 @@ namespace STCA_DataLib.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RANGO_TIEMPO_DiaSemana_HoraInicial_HoraFinal",
+                table: "RANGO_TIEMPO",
+                columns: new[] { "DiaSemana", "HoraInicial", "HoraFinal" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ZONA_HORARIA_Nombre",
+                table: "ZONA_HORARIA",
+                column: "Nombre",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ZONA_HORARIA_RANGO_TIEMPO_RangoTiempoId",

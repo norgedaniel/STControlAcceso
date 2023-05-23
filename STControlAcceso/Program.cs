@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using STCA_DataLib.Data;
+using STCA_DataLib.Model;
+using STCA_DataLib.Repositories;
 using STCA_WebApp.Services;
 
 
@@ -14,6 +16,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<MSSQL_STCA_DbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("default")));
 
 builder.Services.AddScoped<ISTCA_DbService, MSSQL_STCA_DbService>();
+
+//builder.Services.AddScoped<IGenericRepository<ZonaHoraria>, GenericRepository<ZonaHoraria>>();
+
+// register unit of work for work with data layer
+builder.Services.AddScoped<ISCTA_UnitOfWork, SCTA_UnitOfWork>();
 
 var app = builder.Build();
 

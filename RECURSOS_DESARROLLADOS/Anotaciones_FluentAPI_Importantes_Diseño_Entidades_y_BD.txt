@@ -30,12 +30,19 @@ protected override void OnModelCreating(ModelBuilder modelBuilder) {}
 	modelBuilder.Entity<ZonaHoraria>().HasAlternateKey("Nombre");
 	modelBuilder.Entity<RangoTiempo>().HasAlternateKey(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal });
 
+IMPORTANTE:
+  EF Core no permite actualizar el valor de un atributo que interviene en un AK, pues considera las AK como posibles
+  atributos a emplear en relación FK. 
+  Si es necesario poder modificar un atributo que se necesita sea único; debe implementarse un índice único mediante FluentAPI:
+  
+              modelBuilder.Entity<ZonaHoraria>().HasIndex(b => b.Nombre).IsUnique();
+
+              modelBuilder.Entity<RangoTiempo>().HasIndex(x => new { x.DiaSemana, x.HoraInicial, x.HoraFinal }).IsUnique();
+
 
 - para definir una Primary Key:
 
 	en este caso una lleve múltiple en una tabla que es puente en una relación mucho a mucho.
 	modelBuilder.Entity<ZonaHoraria_RangoTiempo>()
 		.HasKey(x => new { x.ZonaHorariaId, x.RangoTiempoId });  
-
-
 

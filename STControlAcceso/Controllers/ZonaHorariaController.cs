@@ -1,232 +1,197 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using Shared;
 using STCA_DataLib.Data;
 using STCA_DataLib.Model;
-using STCA_WebApp.DTO;
-using STCA_WebApp.Extensions;
-using STCA_WebApp.Models;
-using STCA_WebApp.Services;
-using static STCA_WebApp.Extensions.ZonaHorariaExtension;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Http.Features;
-using System.Net.NetworkInformation;
-using Azure.Core;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using STCA_DataLib.Repositories;
 
 namespace STCA_WebApp.Controllers
 {
     public class ZonaHorariaController : Controller
     {
-        private readonly ISTCA_DbService _STCA_DbService;
+        private readonly ISCTA_UnitOfWork _unitOfWork;
 
-        public ZonaHorariaController(ISTCA_DbService service)
+        public ZonaHorariaController(ISCTA_UnitOfWork unitOfWork)
         {
-            _STCA_DbService = service;
+            _unitOfWork = unitOfWork;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> RefrescaForm(string request, int pageZise)
+        // GET: ZonaHoraria
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            return await GetModel(request, pageZise);
+            if (_unitOfWork.ZonaHorariaRepository == null)
+                Problem("Repository set 'ISCTA_UnitOfWork.ZonaHorariaRepository' is null.");
+
+            IEnumerable<ZonaHoraria> zonas_horarias = await _unitOfWork.ZonaHorariaRepository.GetAsync();
+
+            //ViewData["NombreSortParam"] = String.IsNullOrEmpty(sortOrder) ? "nombre_desc" : "";
+
+            //switch (sortOrder)
+            //{
+            //    case "nombre_desc":
+            //        zonas_horarias = zonas_horarias.OrderByDescending(s => s.Nombre);
+            //        break;
+
+            //    default:
+            //        zonas_horarias = zonas_horarias.OrderBy(s => s.Nombre);
+            //        break;
+
+            //}
+
+            return View(zonas_horarias);
+
+            //return _context.ZonasHorarias != null ?
+            //            View(await _context.ZonasHorarias.AsNoTracking().ToArrayAsync()) :
+            //            Problem("Entity set 'MSSQL_STCA_DbContext.ZonasHorarias'  is null.");
         }
 
-
-        // GET: ZonaHorariaController
-        public async Task<IActionResult> Index()
+        // GET: ZonaHoraria/Details/5
+        public async Task<IActionResult> Details(int? id)
         {
-            return await GetModel();
-        }
+            if (id == null)
+                return NotFound();
 
-        private async Task<IActionResult> GetModel(string request = "", int newPageZise = 0)
-        {
-            /*
-             * getOptions indica una acción de ordenamiento o paginado, acometida por el usuario para realizar la búsqueda de los datos soicitados.
-             * Para una acción de ordenamiento tendrá el nombre del atributo o columna presionada.
-             * Para una acción de paginado tendrá: #INI, #ANT, #SIG, #FIN
-             * 
-             * Cuando tiene un valor valido de ordenamiento, se conmuta OrderbyOption almacenado en TempData["ZonaHorariaPagingOptions"], según la columna presionada.
-             * En caso contrario, OrderbyOption se queda con el valor que trae en TempData["ZonaHorariaPagingOptions"]. 
-             * 
-             */
+            ZonaHoraria zonaHoraria = await _unitOfWork.ZonaHorariaRepository.GetByIDAsync(id);
 
-            // los valores almacenados en TempData son eliminados luego de su primera lectura  
-            string sortField = (string)(TempData["LastSortField"] ?? "NOMBRE");
-            bool sortOrderDesc = (bool)(TempData["LastSortOrderDesc"] ?? false);
-
-            int pageNumberZeroBase = (int)(TempData["PageNumberZeroBase"] ?? 0);
-
-            int pageZise;
-            if (newPageZise > 0)
-                pageZise = newPageZise;
-            else
-                pageZise = (int)(TempData["PageZise"] ?? PagingOptions.DEFAULT_PAGE_SIZE);
-
-            int pagesCount = (int)(TempData["PagesCount"] ?? 0);
-
-            string pagingActionRequest = string.Empty;
-
-            if (!request.IsNullOrEmpty())
+            if (zonaHoraria == null)
             {
-                request = request.Trim().ToUpper();
-
-                if (request == "<<" || request == "<" || request == ">" || request == ">>")
-                    pagingActionRequest = request;
-                else
-                {
-                    sortField = request;
-                    sortOrderDesc = !sortOrderDesc;
-                }
-
+                return NotFound();
             }
 
-            // la actualización de TempData debe hacerse después de correr _STCA_DbService.GetZonasHorariasAsync
-            // pues dentro de ese llamado puede actualizarse los datos del paginado
-            ZonaHorariaListDTO zonaHorariaListDTO = await _STCA_DbService.GetZonasHorariasAsync(pageNumberZeroBase, pageZise, pagesCount, pagingActionRequest,
-                                                                                                sortField, sortOrderDesc);
-
-            // actualizando TempData para mantener memoria en el controlador
-            TempData["LastSortField"] = sortField;
-            TempData["LastSortOrderDesc"] = sortOrderDesc;
-
-            TempData["PageNumberZeroBase"] = zonaHorariaListDTO.PageNumberZeroBase;
-            TempData["PageZise"] = zonaHorariaListDTO.PageZise;
-            TempData["PagesCount"] = zonaHorariaListDTO.PagesCount;
-
-            // retornando modelo a la vista
-            return View("Index", new ZonaHorariaViewModel
-            {
-                Items = zonaHorariaListDTO.Items,
-                PageNumberZeroBase = zonaHorariaListDTO.PageNumberZeroBase,
-                PagesCount = zonaHorariaListDTO.PagesCount,
-                PageZiseOptions = PagingOptions.GetPageZiseOptions(zonaHorariaListDTO.PageZise),
-                LastSortField = sortField,
-                LastSortOrderDesc = sortOrderDesc
-            });
-
+            return View(zonaHoraria);
         }
 
+        // GET: ZonaHoraria/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
 
-
-        // POST: ZonaHorariaController/Create
+        // POST: ZonaHoraria/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ZonaHoraria item)
+        public async Task<IActionResult> Create([Bind("Id,Nombre")] ZonaHoraria zonaHoraria)
         {
-            if (!ModelState.IsValid)
-                return RedirectToAction(nameof(Index));
-
-            try
-            {
-                bool ok = await _STCA_DbService.CreateZonaHorariaAsync(item);
-                if (!ok)
-                    return BadRequest("No se pudo adicionar la nueva Zona Horaria.");
-
-                return RedirectToAction(nameof(Index));
-
-            }
-            catch (Exception ex)
-            {
-                if (ex.ContainsString("UNIQUE"))
-                    return BadRequest("La Zona Horaria a crear ya existe en la Base de Datos.");
-                else
-                    return RedirectToAction(nameof(Index));
-            }
-
-        }
-
-
-
-        //POST: ZonaHorariaController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(string? itemsId)
-        {
-            if (!ModelState.IsValid || itemsId == null)
-                return RedirectToAction(nameof(Index));
-
-            foreach (string strId in itemsId.Split(','))
+            if (ModelState.IsValid)
             {
                 try
                 {
-                    if (int.TryParse(strId, out int id))
-                    {
-                        bool ok = await _STCA_DbService.DeleteZonaHorariaAsync(id);
-                        //if (!ok)
-                        //    return BadRequest("No se pudo adicionar la nueva Zona Horaria.");
-                    }
+                    await _unitOfWork.ZonaHorariaRepository.InsertAsync(zonaHoraria);
+                    await _unitOfWork.SaveAsync();
+                    return RedirectToAction(nameof(Index));
 
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //if (ex.ContainsString("UNIQUE"))
-                    //    return BadRequest("La Zona Horaria a crear ya existe en la Base de Datos.");
-                    //else
-                    //return RedirectToAction(nameof(Index));
+                    if (ErrorCodeShared.GetMostInnerExceptionMessage(ex).Contains("UNIQUE"))
+                    {
+                        TempData["ErrorMes"] = "Este nombre de Zona Horaria ya existe.";
+                        return View(zonaHoraria);
+                    }
+                    else
+                        throw;
                 }
 
             }
-
-            return RedirectToAction(nameof(Index));
-
+            return View(zonaHoraria);
         }
 
-
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    if (!ModelState.IsValid )
-        //        return RedirectToAction(nameof(Index));
-
-        //    bool ok = await _STCA_DbService.DeleteZonaHorariaAsync(id);
-        //    //if (!ok)
-        //    //    return BadRequest("No se pudo adicionar la nueva Zona Horaria.");
-
-        //    return RedirectToAction(nameof(Index));
-
-        //}
-
-
-        // GET: ZonaHorariaController/Details/5
-        public ActionResult Details(int id)
+        // GET: ZonaHoraria/Edit/5
+        public async Task<IActionResult> Edit(int? id)
         {
-            return View();
+            if (id == null)
+                return NotFound();
+
+            ZonaHoraria zonaHoraria = await _unitOfWork.ZonaHorariaRepository.GetByIDAsync(id);
+
+            if (zonaHoraria == null)
+                return NotFound();
+
+            return View(zonaHoraria);
+
         }
 
-        // GET: ZonaHorariaController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-
-        // GET: ZonaHorariaController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: ZonaHorariaController/Edit/5
+        // POST: ZonaHoraria/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre")] ZonaHoraria zonaHoraria)
         {
-            try
+            if (id != zonaHoraria.Id)
             {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _unitOfWork.ZonaHorariaRepository.Update(zonaHoraria);
+                    await _unitOfWork.SaveAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    //if (!ZonaHorariaExists(zonaHoraria.Id))
+                    //{
+                    //    return NotFound();
+                    //}
+                    //else
+                    //{
+                    //    throw;
+                    //}
+                }
+                catch (DbUpdateException ex)
+                {
+                    if (ErrorCodeShared.GetMostInnerExceptionMessage(ex).Contains("UNIQUE"))
+                    {
+                        TempData["ErrorMes"] = "Este nombre de Zona Horaria ya existe.";
+                        return View(zonaHoraria);
+                    }
+                    else
+                        throw;
+                }
                 return RedirectToAction(nameof(Index));
             }
-            catch
-            {
-                return View();
-            }
+            return View(zonaHoraria);
         }
 
-    }
+        // GET: ZonaHoraria/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
 
+            bool result = await _unitOfWork.ZonaHorariaRepository.DeleteAsync(id);
+            if (!result)
+                return NotFound();
+
+            return View();
+        }
+
+        // POST: ZonaHoraria/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            bool result = await _unitOfWork.ZonaHorariaRepository.DeleteAsync(id);
+            if (!result)
+                return NotFound();
+ 
+            await _unitOfWork.SaveAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        //private bool ZonaHorariaExists(int id)
+        //{
+        //    return (_context.ZonasHorarias?.Any(e => e.Id == id)).GetValueOrDefault();
+        //}
+    }
 }
